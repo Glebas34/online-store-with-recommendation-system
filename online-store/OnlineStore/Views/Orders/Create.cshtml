@@ -1,0 +1,14 @@
+@{
+    ViewData["Title"] = "Оформление заказа";
+}
+
+<h2>Оформление заказа</h2>
+
+<div class="alert alert-warning">
+    <strong>Вы уверены, что хотите оформить заказ?</strong>
+</div>
+
+<form asp-action="CreateConfirmed" method="post">
+    <button type="submit" class="btn btn-success">Подтвердить</button>
+    <a asp-controller="Cart" asp-action="Index" class="btn btn-secondary">Отмена</a>
+</form>

@@ -1,0 +1,141 @@
+@using OnlineStore.Entities
+@model Product
+
+@{
+    ViewData["Title"] = Model.Title;
+
+    double avgRating = Model.Reviews?.Any() == true
+        ? Math.Round(Model.Reviews.Average(r => r.Rating), 1)
+        : 0;
+
+    var userName = User.Identity?.Name;
+    bool alreadyReviewed = userName != null && Model.Reviews?.Any(r => r.User?.UserName == userName) == true;
+}
+
+<h2>@Model.Title</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <img src="@Model.ImageUrl" class="img-fluid rounded" alt="@Model.Title" />
+    </div>
+    <div class="col-md-8">
+        <p><strong>Цена:</strong> @Model.Price ₽</p>
+        <p>@Model.Description</p>
+
+        @if (avgRating > 0)
+        {
+            <p><strong>Средняя оценка:</strong>
+                @for (int i = 1; i <= 5; i++)
+                {
+                    <span style="color:gold">@(i <= avgRating ? "★" : "☆")</span>
+                }
+                <span>(@avgRating / 5)</span>
+            </p>
+        }
+
+        <form method="post" asp-controller="Cart" asp-action="Add" asp-route-productId="@Model.Id">
+            <button class="btn btn-success">Добавить в корзину</button>
+        </form>
+    </div>
+</div>
+
+<hr />
+<h4>Отзывы</h4>
+
+@if (!Model.Reviews?.Any() ?? true)
+{
+    <p>Пока нет отзывов.</p>
+}
+else
+{
+    foreach (var review in Model.Reviews.OrderByDescending(r => r.CreatedAt))
+    {
+        <div class="border rounded p-3 mb-3">
+            <div><strong>@(review.User?.UserName ?? "Неизвестный пользователь")</strong></div>
+            <div>
+                <strong>Оценка:</strong>
+                @for (int i = 1; i <= 5; i++)
+                {
+                    <span style="color:gold">@(i <= review.Rating ? "★" : "☆")</span>
+                }
+            </div>
+            <div>@review.Comment</div>
+            <div class="text-muted small">@review.CreatedAt.ToLocalTime().ToString("g")</div>
+        </div>
+    }
+}
+
+@if (User.Identity.IsAuthenticated)
+{
+    @if (alreadyReviewed)
+    {
+        <div class="alert alert-info mt-4">
+            Вы уже оставили отзыв на этот товар.
+        </div>
+    }
+    else
+    {
+        <hr />
+        <div id="reviewFormContainer">
+            <h5>Оставить отзыв</h5>
+            <form id="reviewForm">
+                <input type="hidden" id="productId" value="@Model.Id" />
+                <div class="form-group">
+                    <label>Оценка (1–5):</label>
+                    <input type="number" id="rating" min="1" max="5" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label>Комментарий:</label>
+                    <textarea id="comment" class="form-control" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary mt-2">Отправить</button>
+            </form>
+        </div>
+    }
+}
+else
+{
+    <p><em><a asp-controller="Account" asp-action="Login">Войдите</a>, чтобы оставить отзыв.</em></p>
+}
+
+@section Scripts {
+<script>
+document.getElementById("reviewForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const productId = document.getElementById("productId").value;
+    const rating = document.getElementById("rating").value;
+    const comment = document.getElementById("comment").value;
+
+    const response = await fetch("/Review/CreateAjax", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "RequestVerificationToken": document.querySelector("input[name=__RequestVerificationToken]")?.value || ""
+        },
+        body: JSON.stringify({ productId, rating, comment })
+    });
+
+    if (response.ok) {
+        const data = await response.json();
+        alert("Спасибо за отзыв!");
+
+        const reviewHtml = `
+            <div class="border rounded p-3 mb-3">
+                <div><strong>${data.user}</strong></div>
+                <div><strong>Оценка:</strong> ${"★".repeat(data.rating)}${"☆".repeat(5 - data.rating)}</div>
+                <div>${data.comment}</div>
+                <div class="text-muted small">${data.createdAt}</div>
+            </div>
+        `;
+
+        document.querySelector("h4 + p")?.remove(); // remove "нет отзывов"
+        document.querySelector("h4").insertAdjacentHTML("afterend", reviewHtml);
+        document.getElementById("reviewFormContainer").remove();
+    } else {
+        const errorText = await response.text();
+        alert("Ошибка: " + errorText);
+    }
+});
+</script>
+}

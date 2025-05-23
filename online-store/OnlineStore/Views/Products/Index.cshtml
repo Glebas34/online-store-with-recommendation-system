@@ -1,0 +1,117 @@
+@model List<OnlineStore.Entities.Product>
+
+@{
+    ViewData["Title"] = "Каталог товаров";
+    var currentPage = ViewBag.CurrentPage as int? ?? 1;
+    var totalPages = ViewBag.TotalPages as int? ?? 1;
+}
+
+<h2>Каталог товаров</h2>
+
+<form method="get" class="row g-3 mb-4">
+    <div class="col-md-3">
+        <input name="title" class="form-control" placeholder="Название" value="@Context.Request.Query["title"]" />
+    </div>
+    <div class="col-md-3">
+        <input name="author" class="form-control" placeholder="Автор" value="@Context.Request.Query["author"]" />
+    </div>
+    <div class="col-md-2">
+        <input name="minPrice" class="form-control" placeholder="Цена от" value="@Context.Request.Query["minPrice"]" type="number" step="0.01" />
+    </div>
+    <div class="col-md-2">
+        <input name="maxPrice" class="form-control" placeholder="Цена до" value="@Context.Request.Query["maxPrice"]" type="number" step="0.01" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Поиск</button>
+    </div>
+</form>
+
+@if (!Model.Any())
+{
+    <p>Нет товаров по заданным критериям.</p>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var product in Model)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    <img src="@product.ImageUrl" class="card-img-top" alt="@product.Title" />
+                    <div class="card-body">
+                        <h5 class="card-title">@product.Title</h5>
+                        <p class="card-text">@product.Description</p>
+                        <p><strong>@product.Price.ToString("0.00") ₽</strong></p>
+                        <a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id" class="btn btn-sm btn-outline-primary">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+
+            @{
+                int maxPagesToShow = 5;
+                int startPage = Math.Max(1, currentPage - maxPagesToShow / 2);
+                int endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
+                if (endPage - startPage < maxPagesToShow - 1)
+                    startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+            }
+
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Index", new {
+                    page = 1,
+                    title = Context.Request.Query["title"],
+                    author = Context.Request.Query["author"],
+                    minPrice = Context.Request.Query["minPrice"],
+                    maxPrice = Context.Request.Query["maxPrice"]
+                })">« Первая</a>
+            </li>
+
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Index", new {
+                    page = currentPage - 1,
+                    title = Context.Request.Query["title"],
+                    author = Context.Request.Query["author"],
+                    minPrice = Context.Request.Query["minPrice"],
+                    maxPrice = Context.Request.Query["maxPrice"]
+                })">‹ Пред.</a>
+            </li>
+
+            @for (int i = startPage; i <= endPage; i++)
+            {
+                <li class="page-item @(i == currentPage ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("Index", new {
+                        page = i,
+                        title = Context.Request.Query["title"],
+                        author = Context.Request.Query["author"],
+                        minPrice = Context.Request.Query["minPrice"],
+                        maxPrice = Context.Request.Query["maxPrice"]
+                    })">@i</a>
+                </li>
+            }
+
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Index", new {
+                    page = currentPage + 1,
+                    title = Context.Request.Query["title"],
+                    author = Context.Request.Query["author"],
+                    minPrice = Context.Request.Query["minPrice"],
+                    maxPrice = Context.Request.Query["maxPrice"]
+                })">След. ›</a>
+            </li>
+
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Index", new {
+                    page = totalPages,
+                    title = Context.Request.Query["title"],
+                    author = Context.Request.Query["author"],
+                    minPrice = Context.Request.Query["minPrice"],
+                    maxPrice = Context.Request.Query["maxPrice"]
+                })">Последняя »</a>
+            </li>
+        </ul>
+    </nav>
+}
