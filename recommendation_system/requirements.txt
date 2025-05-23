@@ -1,0 +1,27 @@
+# FastAPI и сервер
+fastapi
+uvicorn[standard]
+
+# Модель и математика
+scikit-learn
+scipy
+numpy
+pandas
+
+# База данных
+SQLAlchemy
+psycopg2-binary
+
+# Kafka
+kafka-python
+aiokafka
+
+# Планировщик
+APScheduler
+
+# Вспомогательные
+python-dotenv
+requests
+tqdm
+
+asyncpg
