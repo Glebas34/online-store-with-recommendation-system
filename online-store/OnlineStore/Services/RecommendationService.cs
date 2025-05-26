@@ -38,24 +38,4 @@ public class RecommendationService
             return new List<string>();
         }
     }
-
-    public async Task<List<string>> GetPopularBooks(int topK = 5)
-    {
-        try
-        {
-            var url = $"{_recommendationApiUrl}/popular?top_k={topK}&min_ratings=4";
-            var response = await _httpClient.GetAsync(url);
-            response.EnsureSuccessStatusCode();
-
-            var json = await response.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<List<string>>(json);
-
-            return result is null ? [] : result;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"❌ Ошибка при получении популярных книг: {ex.Message}");
-            return [];
-        }
-    }
 }

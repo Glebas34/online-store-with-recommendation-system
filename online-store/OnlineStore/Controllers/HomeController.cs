@@ -42,16 +42,15 @@ public class HomeController : Controller
             }
         }
 
-        // Загружаем популярные товары (всегда)
-        var popularIds = await _recommendation.GetPopularBooks();
-        popularProducts = await _context.Products
-            .Where(p => popularIds.Contains(p.Id))
+        var latestProducts = await _context.Products
+            .OrderByDescending(p => p.CreatedAt)
+            .Take(8)
             .ToListAsync();
 
         var model = new HomeViewModel
         {
             Recommendations = recommendedProducts,
-            PopularBooks = popularProducts
+            LatestProducts = latestProducts
         };
 
         return View(model);

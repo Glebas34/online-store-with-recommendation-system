@@ -1,7 +1,12 @@
 @using OnlineStore.Entities
-@model List<CartItem>
+@model List<OnlineStore.Entities.CartItem>
 
-<h2>Корзина</h2>
+@{
+    ViewData["Title"] = "Корзина";
+    decimal total = Model.Sum(i => i.Product.Price * i.Quantity);
+}
+
+<h2 class="mb-4">Ваша корзина</h2>
 
 @if (!Model.Any())
 {
@@ -9,13 +14,18 @@
 }
 else
 {
-    <table class="table">
+    <form asp-action="Clear" method="post" class="text-end mb-3">
+        <button type="submit" class="btn btn-outline-danger">Очистить корзину</button>
+    </form>
+
+    <table class="table table-striped">
         <thead>
             <tr>
                 <th>Товар</th>
-                <th>Кол-во</th>
                 <th>Цена</th>
-                <th>Действия</th>
+                <th style="width: 160px;">Количество</th>
+                <th>Сумма</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -23,13 +33,46 @@ else
         {
             <tr>
                 <td>@item.Product.Title</td>
-                <td>@item.Quantity</td>
-                <td>@(item.Product.Price * item.Quantity) ₽</td>
+                <td>@item.Product.Price.ToString("0.00") ₽</td>
                 <td>
-                    <a asp-action="Remove" asp-route-productId="@item.Product.Id" class="btn btn-danger">Удалить</a>
+                    <div class="d-flex align-items-center">
+                        <form asp-action="UpdateQuantity" method="post" class="d-inline me-1">
+                            <input type="hidden" name="productId" value="@item.ProductId" />
+                            <input type="hidden" name="newQuantity" value="@(item.Quantity - 1)" />
+                            <button type="submit" class="btn btn-sm btn-outline-secondary" @(item.Quantity == 1 ? "disabled" : "")>-</button>
+                        </form>
+
+                        <span class="mx-2">@item.Quantity</span>
+
+                        <form asp-action="UpdateQuantity" method="post" class="d-inline ms-1">
+                            <input type="hidden" name="productId" value="@item.ProductId" />
+                            <input type="hidden" name="newQuantity" value="@(item.Quantity + 1)" />
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">+</button>
+                        </form>
+                    </div>
+                </td>
+                <td>@((item.Product.Price * item.Quantity).ToString("0.00")) ₽</td>
+                <td>
+                    <form asp-action="Remove" method="post">
+                        <input type="hidden" name="productId" value="@item.ProductId" />
+                        <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                    </form>
                 </td>
             </tr>
         }
         </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" class="text-end"><strong>Итого:</strong></td>
+                <td><strong>@total.ToString("0.00") ₽</strong></td>
+                <td></td>
+            </tr>
+        </tfoot>
     </table>
+
+    <div class="text-end">
+        <form asp-controller="Orders" asp-action="Create" method="get">
+            <button type="submit" class="btn btn-success">Оформить заказ</button>
+        </form>
+    </div>
 }

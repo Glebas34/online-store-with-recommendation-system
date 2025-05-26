@@ -45,7 +45,7 @@ services:
     container_name: postgres
     environment:
       POSTGRES_DB: recommendation_db
-      POSTGRES_USER: user
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
@@ -62,8 +62,8 @@ services:
     container_name: aspnet_postgres
     restart: always
     environment:
-      POSTGRES_USER: store_user
-      POSTGRES_PASSWORD: store_pass
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
       POSTGRES_DB: OnlineStoreDb
       PGPORT: 5433
     ports:

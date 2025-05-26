@@ -43,9 +43,9 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 var app = builder.Build();
 
-/*using var scope = app.Services.CreateScope();
+using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
-await SeedData.InitializeAsync(services);*/
+//await SeedData.InitializeAsync(services);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

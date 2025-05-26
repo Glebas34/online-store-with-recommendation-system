@@ -104,6 +104,37 @@ public class CartController : Controller
         return RedirectToAction("Index");
     }
 
+    [HttpPost]
+    public async Task<IActionResult> UpdateQuantity(string productId, int newQuantity)
+    {
+        if (string.IsNullOrWhiteSpace(productId) || newQuantity < 0)
+        {
+            TempData["Error"] = "Некорректный запрос.";
+            return RedirectToAction("Index");
+        }
+
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var cart = await GetOrCreateCartAsync(userId);
+
+        var item = cart.Items.FirstOrDefault(i => i.ProductId == productId);
+        if (item != null)
+        {
+            if (newQuantity == 0)
+            {
+                _context.CartItems.Remove(item);
+            }
+            else
+            {
+                item.Quantity = newQuantity;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        return RedirectToAction("Index");
+    }
+
+
     // Очистка корзины
     [HttpPost]
     public async Task<IActionResult> Clear()

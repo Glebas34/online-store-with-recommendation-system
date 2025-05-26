@@ -92,30 +92,6 @@ async def recommend(user_id: str, top_k: int = 5):
         "recommendations": [str(item) for item in top_items]
     }
 
-@app.get("/popular")
-async def popular(top_k: int = 10, min_ratings: int = 5):
-    try:
-        async with AsyncSessionLocal() as session:
-            result = await session.execute(text(f"""
-                SELECT book_id
-                FROM user_ratings
-                GROUP BY book_id
-                HAVING COUNT(*) >= :min_ratings
-                ORDER BY AVG(rating) DESC
-                LIMIT :top_k
-            """), {"min_ratings": min_ratings, "top_k": top_k})
-
-            books = [row[0] for row in result.fetchall()]
-
-        if not books:
-            raise HTTPException(status_code=404, detail="Нет популярных книг.")
-
-        return books
-
-    except Exception as e:
-        print(f"❌ Ошибка при вычислении популярных книг: {e}")
-        raise HTTPException(status_code=500, detail="Ошибка при вычислении популярных книг.")
-
 
 if __name__ == "__main__":
     import uvicorn
