@@ -60,7 +60,6 @@ public class AccountController : Controller
 
         if (result.Succeeded)
         {
-            // Создание корзины
             var cart = new Cart
             {
                 UserId = user.Id,

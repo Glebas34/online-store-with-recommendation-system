@@ -22,7 +22,6 @@ public class CartController : Controller
         return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     }
 
-    // Получаем или создаём корзину текущего пользователя
     private async Task<Cart> GetOrCreateCartAsync(string userId)
     {
         if (string.IsNullOrEmpty(userId))
@@ -53,7 +52,6 @@ public class CartController : Controller
         return cart;
     }
 
-    // Просмотр корзины
     public async Task<IActionResult> Index()
     {
         var userId = GetCurrentUserId();
@@ -62,7 +60,6 @@ public class CartController : Controller
         return View(cart.Items.ToList());
     }
 
-    // Добавление товара в корзину
     [HttpPost]
     public async Task<IActionResult> Add(string productId)
     {
@@ -87,7 +84,6 @@ public class CartController : Controller
         return RedirectToAction("Index");
     }
 
-    // Удаление товара из корзины
     [HttpPost]
     public async Task<IActionResult> Remove(string productId)
     {
@@ -113,7 +109,7 @@ public class CartController : Controller
             return RedirectToAction("Index");
         }
 
-        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var cart = await GetOrCreateCartAsync(userId);
 
         var item = cart.Items.FirstOrDefault(i => i.ProductId == productId);
@@ -135,7 +131,6 @@ public class CartController : Controller
     }
 
 
-    // Очистка корзины
     [HttpPost]
     public async Task<IActionResult> Clear()
     {

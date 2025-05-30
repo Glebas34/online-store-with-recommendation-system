@@ -13,7 +13,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-light bg-light">
             <div class="container">
-                <a class="navbar-brand" asp-controller="Home" asp-action="Index">Магазин</a>
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">Магазин книг</a>
 
                 <div class="collapse navbar-collapse">
                     <ul class="navbar-nav ms-auto">
@@ -29,15 +29,15 @@
                                 <vc:cart-summary />
                             </li>
                             <li class="nav-item">
-                                <form asp-controller="Account" asp-action="Logout" method="post" class="form-inline">
-                                    <button class="btn btn-link nav-link" type="submit">Выйти</button>
-                                </form>
-                            </li>
-                            <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Orders" asp-action="History">Мои заказы</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Cart" asp-action="Index">Корзина</a>
+                            </li>
+                            <li class="nav-item">
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="form-inline">
+                                    <button class="btn btn-link nav-link" type="submit">Выйти</button>
+                                </form>
                             </li>
                         }
                         else

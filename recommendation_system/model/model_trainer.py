@@ -25,7 +25,7 @@ async def load_data():
             rows = result.fetchall()
 
             if rows:
-                print(f"✅ Загружено {len(rows)} записей из базы данных.")
+                print(f"Загружено {len(rows)} записей из базы данных.")
                 user_ids = [row[0] for row in rows]
                 book_ids = [row[1] for row in rows]
                 ratings = [row[2] for row in rows]
@@ -36,17 +36,17 @@ async def load_data():
                     "rating": ratings
                 })
             else:
-                print("⚠️ База пуста. Загружаем из CSV...")
+                print("База пуста. Загружаем из CSV...")
                 csv_path = "data/processed/train_ratings.csv"
                 if not os.path.exists(csv_path):
-                    raise FileNotFoundError(f"❌ CSV-файл не найден: {csv_path}")
+                    raise FileNotFoundError(f"CSV-файл не найден: {csv_path}")
 
                 df = pd.read_csv(csv_path)
-                print(f"✅ Загружено {len(df)} записей из CSV.")
+                print(f"Загружено {len(df)} записей из CSV.")
                 return df
 
         except Exception as e:
-            print(f"❌ Ошибка при загрузке данных: {e}")
+            print(f"Ошибка при загрузке данных: {e}")
             return None
 
 async def train_model():
@@ -54,10 +54,10 @@ async def train_model():
     df = await load_data()
 
     if df is None or df.empty:
-        print("❌ Обучение не выполнено: нет данных.")
+        print("Обучение не выполнено: нет данных.")
         return
 
-    print("⚙️ Начинаем обучение модели...")
+    print("Начинаем обучение модели...")
 
     user_encoder = LabelEncoder()
     item_encoder = LabelEncoder()
@@ -83,7 +83,7 @@ async def train_model():
     with open(MODEL_PATH, "wb") as f:
         pickle.dump(model_data, f)
 
-    print("✅ Модель успешно обучена и сохранена.")
+    print("Модель успешно обучена и сохранена.")
 
 if __name__ == "__main__":
     asyncio.run(train_model())

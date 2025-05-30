@@ -28,7 +28,7 @@ public class HomeController : Controller
         if (User.Identity.IsAuthenticated)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            recommendedIds = await _recommendation.GetRecommendations(userId);
+            recommendedIds = await _recommendation.GetRecommendations(userId, 8);
             Console.WriteLine("Рекомендации:");
             foreach (var recommendedId in recommendedIds)
                 Console.Write(recommendedId + " ");
@@ -55,6 +55,5 @@ public class HomeController : Controller
 
         return View(model);
     }
-
 }
 

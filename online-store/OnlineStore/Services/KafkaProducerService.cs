@@ -34,11 +34,11 @@ public class KafkaProducerService
             var message = new Message<Null, string> { Value = json };
 
             var result = await _producer.ProduceAsync(_topic, message);
-            _logger.LogInformation("📤 Kafka: событие отправлено в {Topic}, offset: {Offset}", _topic, result.Offset);
+            _logger.LogInformation("Kafka: событие отправлено в {Topic}, offset: {Offset}", _topic, result.Offset);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Ошибка при отправке события в Kafka.");
+            _logger.LogError(ex, "Ошибка при отправке события в Kafka.");
         }
     }
 }

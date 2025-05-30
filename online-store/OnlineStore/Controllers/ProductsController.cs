@@ -13,7 +13,6 @@ public class ProductsController : Controller
         _context = context;
     }
 
-    // ✅ Просмотр всех товаров — доступен всем
     [AllowAnonymous]
     public async Task<IActionResult> Index(
         string? title, 
@@ -39,7 +38,6 @@ public class ProductsController : Controller
 
         var totalItems = await query.CountAsync();
         var products = await query
-            //.OrderByDescending(p => p.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
@@ -50,8 +48,6 @@ public class ProductsController : Controller
         return View(products);
     }
 
-
-    // ✅ Просмотр карточки товара
     [AllowAnonymous]
     public async Task<IActionResult> Details(string id)
     {
@@ -65,16 +61,12 @@ public class ProductsController : Controller
         return View(product);
     }
 
-
-
-    // ✅ Создание товара (форма) — только для админов
     [Authorize(Roles = "Admin")]
     public IActionResult Create()
     {
         return View();
     }
 
-    // ✅ Создание товара (POST)
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Admin")]
@@ -89,7 +81,6 @@ public class ProductsController : Controller
         return RedirectToAction("Index");
     }
 
-    // ✅ Редактирование товара (форма)
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(string id)
     {
@@ -99,7 +90,6 @@ public class ProductsController : Controller
         return View(product);
     }
 
-    // ✅ Редактирование товара (POST)
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Admin")]
@@ -114,7 +104,6 @@ public class ProductsController : Controller
         return RedirectToAction("Index");
     }
 
-    // ✅ Удаление товара
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Admin")]

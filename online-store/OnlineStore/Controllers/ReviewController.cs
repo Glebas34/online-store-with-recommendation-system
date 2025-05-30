@@ -64,8 +64,8 @@ public class ReviewController : Controller
     }
 
     [HttpPost]
-public async Task<IActionResult> CreateAjax([FromBody] ReviewRequest model)
-{
+    public async Task<IActionResult> CreateAjax([FromBody] ReviewRequest model)
+    {
     if (model.Rating < 1 || model.Rating > 5)
         return BadRequest("Оценка должна быть от 1 до 5.");
 
@@ -110,7 +110,7 @@ public async Task<IActionResult> CreateAjax([FromBody] ReviewRequest model)
         createdAt = review.CreatedAt.ToLocalTime().ToString("g"),
         avgRating = product.Reviews.Append(review).Average(r => r.Rating)
     });
-}
+    }
 
     public class ReviewRequest
     {

@@ -172,6 +172,7 @@ public static class SeedData
 
             }
         }
+        //return;
         context.Products.AddRange(products.Values);
         await context.SaveChangesAsync();
         context.Reviews.AddRange(reviews);

@@ -2,6 +2,7 @@ import asyncio
 import os
 from db.db import engine
 from db.models import Base
+from scripts.load_train_to_db import load_data_to_db
 from dotenv import load_dotenv
 from sqlalchemy import inspect
 
@@ -19,6 +20,7 @@ async def create_tables():
             print("⚠️ Таблица 'user_ratings' уже существует. Пропускаем создание.")
         else:
             await conn.run_sync(Base.metadata.create_all)
+            await load_data_to_db()
             print("✅ Таблица 'user_ratings' успешно создана.")
 
 if __name__ == "__main__":

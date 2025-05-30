@@ -1,8 +1,7 @@
-# kafka_consumer.py
 import asyncio
-from kafka import KafkaConsumer
+from aiokafka import AIOKafkaConsumer
 from sqlalchemy import text
-from db import engine, AsyncSessionLocal
+from db import AsyncSessionLocal
 import json
 import os
 from dotenv import load_dotenv
@@ -13,15 +12,6 @@ load_dotenv()
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC")
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS")
 
-consumer = KafkaConsumer(
-    KAFKA_TOPIC,
-    bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-    value_deserializer=lambda x: json.loads(x.decode("utf-8")),
-    auto_offset_reset="earliest",
-    enable_auto_commit=True,
-    group_id="recommendation-group"
-)
-
 event_buffer = []
 EVENT_THRESHOLD = 100
 
@@ -29,7 +19,7 @@ async def process_event(event):
     async with AsyncSessionLocal() as session:
         try:
             await session.execute(text("""
-                INSERT INTO user_events (user_id, item_id, rating)
+                INSERT INTO user_ratings (user_id, item_id, rating)
                 VALUES (:user_id, :item_id, :rating)
             """), {
                 "user_id": event["user_id"],
@@ -37,29 +27,41 @@ async def process_event(event):
                 "rating": event["rating"]
             })
             await session.commit()
-            print("✅ Сохранено в БД.")
+            print("Сохранено в БД.")
         except Exception as e:
-            print("❌ Ошибка при записи в БД:", e)
+            print("Ошибка при записи в БД:", e)
 
-async def main():
-    print("📡 Kafka Consumer слушает события...")
+async def consume():
+    consumer = AIOKafkaConsumer(
+        KAFKA_TOPIC,
+        bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
+        value_deserializer=lambda x: json.loads(x.decode("utf-8")),
+        auto_offset_reset="earliest",
+        enable_auto_commit=True,
+        group_id="recommendation-group"
+    )
 
-    for message in consumer:
-        event = message.value
-        print(f"📨 Получено событие: {event}")
+    await consumer.start()
+    print("Kafka Consumer (aiokafka) запущен...")
+    try:
+        async for message in consumer:
+            event = message.value
+            print(f"Получено событие: {event}")
 
-        if event.get("user_id") and event.get("book_id") and event.get("rating") is not None:
-            await process_event(event)
+            if event.get("user_id") and event.get("book_id") and event.get("rating") is not None:
+                await process_event(event)
 
-            event_buffer.append((event["user_id"], event["book_id"], event["rating"]))
+                event_buffer.append((event["user_id"], event["book_id"], event["rating"]))
 
-            if len(event_buffer) >= EVENT_THRESHOLD:
-                try:
-                    print(f"⚙️  Обновляем модель на основе {len(event_buffer)} событий...")
-                    update_model_batch(event_buffer)
-                    event_buffer.clear()
-                except Exception as e:
-                    print("❌ Ошибка при обновлении модели:", e)
+                if len(event_buffer) >= EVENT_THRESHOLD:
+                    try:
+                        print(f"Обновляем модель на основе {len(event_buffer)} событий...")
+                        update_model_batch(event_buffer)
+                        event_buffer.clear()
+                    except Exception as e:
+                        print("Ошибка при обновлении модели:", e)
+    finally:
+        await consumer.stop()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(consume())

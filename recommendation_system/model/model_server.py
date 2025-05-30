@@ -13,7 +13,6 @@ MODEL_PATH = "model/svd_model.pkl"
 
 app = FastAPI()
 
-# Разрешить CORS для фронта
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -29,9 +28,8 @@ user_item_matrix = None
 item_decoder = None
 
 async def load_model():
-    """Пробует загрузить модель, если её нет — обучает с нуля."""
     if not os.path.exists(MODEL_PATH):
-        print("⚠️ Модель не найдена. Запускаем обучение...")
+        print("Модель не найдена. Запускаем обучение...")
         result = await asyncio.create_subprocess_exec(
             "python", "-m", "model.model_trainer",
             stdout=subprocess.PIPE,
@@ -48,19 +46,18 @@ async def load_model():
     try:
         with open(MODEL_PATH, "rb") as f:
             model_data = pickle.load(f)
-        print("✅ Модель успешно загружена.")
+        print("Модель успешно загружена.")
         return model_data
     except Exception as e:
-        raise RuntimeError(f"❌ Не удалось загрузить модель: {e}")
+        raise RuntimeError(f"Не удалось загрузить модель: {e}")
 
 @app.on_event("startup")
 async def startup_event():
     global svd, user_encoder, item_encoder, user_item_matrix, item_decoder
 
-    # 1. Создаём таблицы в БД
     await create_tables()
+    subprocess.Popen(["python", "kafka_consumer.py"])
 
-    # 2. Загружаем или обучаем модель
     model_data = await load_model()
 
     svd = model_data["svd"]
@@ -80,7 +77,6 @@ async def recommend(user_id: str, top_k: int = 5):
     item_vectors = svd.components_.T
     scores = np.dot(item_vectors, user_vector.T).flatten()
 
-    # Исключаем просмотренные
     interacted_items = user_item_matrix[user_idx].nonzero()[1]
     scores[interacted_items] = -np.inf
 

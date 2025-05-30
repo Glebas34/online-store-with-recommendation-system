@@ -20,7 +20,7 @@
     </div>
     <div class="col-md-8">
         <p><strong>Цена:</strong> @Model.Price ₽</p>
-        <p>@Model.Description</p>
+        <p><strong>Описание книги:</strong> @Model.Description</p>
 
         @if (avgRating > 0)
         {
@@ -129,7 +129,7 @@ document.getElementById("reviewForm").addEventListener("submit", async function 
             </div>
         `;
 
-        document.querySelector("h4 + p")?.remove(); // remove "нет отзывов"
+        document.querySelector("h4 + p")?.remove();
         document.querySelector("h4").insertAdjacentHTML("afterend", reviewHtml);
         document.getElementById("reviewFormContainer").remove();
     } else {
